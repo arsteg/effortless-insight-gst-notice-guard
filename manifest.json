@@ -1,0 +1,71 @@
+{
+  "manifest_version": 3,
+  "name": "EffortlessInsight - GST Notice Guard",
+  "version": "1.0.0",
+  "description": "Automatically capture and sync GST notices from the GST portal to EffortlessInsight",
+
+  "permissions": [
+    "storage",
+    "notifications",
+    "alarms"
+  ],
+
+  "host_permissions": [
+    "https://services.gst.gov.in/*",
+    "https://www.gst.gov.in/*",
+    "https://api.effortlessinsight.in/*",
+    "https://localhost/*",
+    "https://app.effortlessinsight.in/*",
+    "http://localhost:3000/*"
+  ],
+
+  "background": {
+    "service_worker": "src/background.js",
+    "type": "module"
+  },
+
+  "content_scripts": [
+    {
+      "matches": [
+        "https://services.gst.gov.in/*",
+        "https://www.gst.gov.in/*"
+      ],
+      "js": ["src/content.js"],
+      "css": ["src/content.css"],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": [
+        "https://app.effortlessinsight.in/*",
+        "http://localhost:3000/*"
+      ],
+      "js": ["src/connect.js"],
+      "run_at": "document_idle"
+    }
+  ],
+
+  "action": {
+    "default_popup": "src/popup.html",
+    "default_icon": {
+      "16": "assets/icon-16.png",
+      "32": "assets/icon-32.png",
+      "48": "assets/icon-48.png",
+      "128": "assets/icon-128.png"
+    },
+    "default_title": "GST Notice Guard"
+  },
+
+  "icons": {
+    "16": "assets/icon-16.png",
+    "32": "assets/icon-32.png",
+    "48": "assets/icon-48.png",
+    "128": "assets/icon-128.png"
+  },
+
+  "web_accessible_resources": [
+    {
+      "resources": ["assets/*"],
+      "matches": ["https://services.gst.gov.in/*", "https://www.gst.gov.in/*"]
+    }
+  ]
+}

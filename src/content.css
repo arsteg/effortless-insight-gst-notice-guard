@@ -1,0 +1,165 @@
+/**
+ * GST Notice Guard - Content Script Styles
+ * Minimal styles injected into GST portal pages
+ */
+
+/* Overlay indicator when syncing */
+.gst-guard-sync-indicator {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background: #007bff;
+  color: white;
+  padding: 12px 16px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  z-index: 999999;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  animation: gst-guard-slide-in 0.3s ease;
+}
+
+.gst-guard-sync-indicator.success {
+  background: #28a745;
+}
+
+.gst-guard-sync-indicator.error {
+  background: #dc3545;
+}
+
+.gst-guard-sync-indicator .spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: gst-guard-spin 1s linear infinite;
+}
+
+@keyframes gst-guard-slide-in {
+  from {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes gst-guard-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* First-time GSTIN link confirmation card */
+.gst-guard-link-prompt {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  width: 340px;
+  background: #ffffff;
+  color: #212529;
+  border: 1px solid #dee2e6;
+  border-radius: 10px;
+  padding: 16px;
+  font-size: 14px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+  z-index: 999999;
+  animation: gst-guard-slide-in 0.3s ease;
+}
+
+.gst-guard-link-title {
+  font-weight: 600;
+  font-size: 15px;
+  margin-bottom: 8px;
+}
+
+.gst-guard-link-gstin {
+  font-weight: 600;
+  margin-bottom: 4px;
+  word-break: break-word;
+}
+
+.gst-guard-link-org {
+  color: #495057;
+  margin-bottom: 6px;
+  word-break: break-word;
+}
+
+.gst-guard-link-hint {
+  color: #868e96;
+  font-size: 12px;
+  margin-bottom: 12px;
+}
+
+.gst-guard-link-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.gst-guard-btn {
+  border: none;
+  border-radius: 6px;
+  padding: 8px 14px;
+  font-size: 13px;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.gst-guard-btn:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.gst-guard-btn-primary {
+  background: #007bff;
+  color: #ffffff;
+}
+
+.gst-guard-btn-primary:hover:not(:disabled) {
+  background: #0056b3;
+}
+
+.gst-guard-btn-ghost {
+  background: transparent;
+  color: #495057;
+  border: 1px solid #ced4da;
+}
+
+.gst-guard-btn-ghost:hover:not(:disabled) {
+  background: #f1f3f5;
+}
+
+/* Highlight captured notices */
+.gst-guard-captured {
+  position: relative;
+}
+
+.gst-guard-captured::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 8px;
+  height: 8px;
+  background: #28a745;
+  border-radius: 50%;
+  animation: gst-guard-pulse 2s infinite;
+}
+
+@keyframes gst-guard-pulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.5;
+    transform: scale(1.2);
+  }
+}

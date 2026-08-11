@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GST Notice Guard</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+      width: 320px;
+      min-height: 200px;
+      background: #f8f9fa;
+      color: #333;
+    }
+
+    .container {
+      padding: 16px;
+    }
+
+    .header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid #e9ecef;
+    }
+
+    .header img {
+      width: 32px;
+      height: 32px;
+    }
+
+    .header h1 {
+      font-size: 16px;
+      font-weight: 600;
+      color: #1a1a1a;
+    }
+
+    .header span {
+      font-size: 11px;
+      color: #666;
+    }
+
+    /* Login Form */
+    .login-form {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .form-group label {
+      font-size: 12px;
+      font-weight: 500;
+      color: #555;
+    }
+
+    .form-group input {
+      padding: 10px 12px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      font-size: 14px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .form-group input:focus {
+      border-color: #007bff;
+    }
+
+    .btn {
+      padding: 10px 16px;
+      border: none;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+
+    .btn-primary {
+      background: #007bff;
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: #0056b3;
+    }
+
+    .btn-primary:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+    }
+
+    .btn-secondary {
+      background: #6c757d;
+      color: white;
+    }
+
+    .btn-secondary:hover {
+      background: #545b62;
+    }
+
+    .btn-danger {
+      background: #dc3545;
+      color: white;
+    }
+
+    .btn-danger:hover {
+      background: #c82333;
+    }
+
+    .error {
+      color: #dc3545;
+      font-size: 12px;
+      margin-top: 8px;
+    }
+
+    /* Dashboard (logged in) */
+    .dashboard {
+      display: none;
+    }
+
+    .user-info {
+      background: white;
+      padding: 12px;
+      border-radius: 8px;
+      margin-bottom: 12px;
+      border: 1px solid #e9ecef;
+    }
+
+    .user-info .name {
+      font-weight: 600;
+      font-size: 14px;
+    }
+
+    .user-info .org {
+      font-size: 12px;
+      color: #666;
+      margin-top: 2px;
+    }
+
+    .status-card {
+      background: white;
+      padding: 12px;
+      border-radius: 8px;
+      margin-bottom: 12px;
+      border: 1px solid #e9ecef;
+    }
+
+    .status-card h3 {
+      font-size: 12px;
+      color: #666;
+      margin-bottom: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .status-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 6px 0;
+    }
+
+    .status-item span {
+      font-size: 13px;
+    }
+
+    .status-item .value {
+      font-weight: 600;
+    }
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 2px 8px;
+      border-radius: 12px;
+      font-size: 11px;
+      font-weight: 500;
+    }
+
+    .status-badge.active {
+      background: #d4edda;
+      color: #155724;
+    }
+
+    .status-badge.inactive {
+      background: #f8d7da;
+      color: #721c24;
+    }
+
+    .status-badge::before {
+      content: '';
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: currentColor;
+    }
+
+    .actions {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .footer {
+      margin-top: 16px;
+      padding-top: 12px;
+      border-top: 1px solid #e9ecef;
+      text-align: center;
+    }
+
+    .footer a {
+      color: #007bff;
+      text-decoration: none;
+      font-size: 12px;
+    }
+
+    .footer a:hover {
+      text-decoration: underline;
+    }
+
+    /* Settings Toggle */
+    .settings-toggle {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 0;
+      border-bottom: 1px solid #e9ecef;
+    }
+
+    .settings-toggle:last-child {
+      border-bottom: none;
+    }
+
+    .settings-toggle label {
+      font-size: 13px;
+      color: #333;
+    }
+
+    .toggle-switch {
+      position: relative;
+      width: 40px;
+      height: 22px;
+    }
+
+    .toggle-switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .toggle-slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: #ccc;
+      transition: 0.3s;
+      border-radius: 22px;
+    }
+
+    .toggle-slider:before {
+      position: absolute;
+      content: "";
+      height: 16px;
+      width: 16px;
+      left: 3px;
+      bottom: 3px;
+      background-color: white;
+      transition: 0.3s;
+      border-radius: 50%;
+    }
+
+    input:checked + .toggle-slider {
+      background-color: #007bff;
+    }
+
+    input:checked + .toggle-slider:before {
+      transform: translateX(18px);
+    }
+
+    /* Loading */
+    .loading {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 40px;
+    }
+
+    .spinner {
+      width: 24px;
+      height: 24px;
+      border: 3px solid #f3f3f3;
+      border-top: 3px solid #007bff;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .hidden {
+      display: none !important;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <img src="../assets/icon-48.png" alt="GST Notice Guard">
+      <div>
+        <h1>GST Notice Guard</h1>
+        <span>by EffortlessInsight</span>
+      </div>
+    </div>
+
+    <!-- Loading State -->
+    <div id="loading" class="loading">
+      <div class="spinner"></div>
+    </div>
+
+    <!-- Login Form -->
+    <div id="login-section" class="login-form hidden">
+      <p style="font-size: 13px; color: #666; margin-bottom: 8px;">
+        Sign in with your EffortlessInsight account to sync GST notices.
+      </p>
+
+      <div class="form-group" id="env-group">
+        <label for="api-environment">Server</label>
+        <select id="api-environment" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px; box-sizing: border-box;"></select>
+      </div>
+
+      <button type="button" id="web-session-btn" class="btn btn-primary">
+        Use my EffortlessInsight session
+      </button>
+      <p style="font-size: 11px; color: #868e96; text-align: center; margin-top: -4px;">
+        Reuses your signed-in browser session — works with Google sign-in.
+      </p>
+
+      <div style="display: flex; align-items: center; gap: 8px; color: #adb5bd; font-size: 11px;">
+        <div style="flex: 1; height: 1px; background: #dee2e6;"></div>
+        or sign in with a password
+        <div style="flex: 1; height: 1px; background: #dee2e6;"></div>
+      </div>
+
+      <div class="form-group">
+        <label for="email">Email</label>
+        <input type="email" id="email" placeholder="you@example.com" required>
+      </div>
+
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input type="password" id="password" placeholder="Your password" required>
+      </div>
+
+      <button type="button" id="login-btn" class="btn btn-secondary">Sign In</button>
+
+      <div id="login-error" class="error hidden"></div>
+
+      <div class="footer">
+        <a id="register-link" href="https://app.effortlessinsight.in/register" target="_blank">
+          Don't have an account? Sign up
+        </a>
+      </div>
+    </div>
+
+    <!-- Dashboard (logged in) -->
+    <div id="dashboard-section" class="dashboard hidden">
+      <div class="user-info">
+        <div class="name" id="user-name">Loading...</div>
+        <div class="org" id="org-name">-</div>
+      </div>
+
+      <div class="status-card">
+        <h3>Sync Status</h3>
+        <div class="status-item">
+          <span>Auto-Capture</span>
+          <span class="status-badge active" id="auto-capture-status">Active</span>
+        </div>
+        <div class="status-item">
+          <span>Monitored GSTINs</span>
+          <span class="value" id="gstin-count">-</span>
+        </div>
+        <div class="status-item">
+          <span>Last Sync</span>
+          <span class="value" id="last-sync">Never</span>
+        </div>
+      </div>
+
+      <div class="status-card">
+        <h3>Notifications</h3>
+        <div class="settings-toggle">
+          <label for="notify-enabled">Enable Notifications</label>
+          <div class="toggle-switch">
+            <input type="checkbox" id="notify-enabled" checked>
+            <span class="toggle-slider"></span>
+          </div>
+        </div>
+        <div class="settings-toggle">
+          <label for="notify-sync">Sync Complete</label>
+          <div class="toggle-switch">
+            <input type="checkbox" id="notify-sync" checked>
+            <span class="toggle-slider"></span>
+          </div>
+        </div>
+        <div class="settings-toggle">
+          <label for="notify-due-dates">Due Date Reminders</label>
+          <div class="toggle-switch">
+            <input type="checkbox" id="notify-due-dates" checked>
+            <span class="toggle-slider"></span>
+          </div>
+        </div>
+      </div>
+
+      <div class="actions">
+        <button type="button" id="open-dashboard-btn" class="btn btn-primary">
+          Open Dashboard
+        </button>
+        <button type="button" id="logout-btn" class="btn btn-danger">
+          Sign Out
+        </button>
+      </div>
+
+      <div class="footer">
+        <a href="https://app.effortlessinsight.in/help/extension" target="_blank">
+          Need help? View guide
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
