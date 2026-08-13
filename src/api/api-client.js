@@ -5,6 +5,10 @@
 
 import { getApiBaseUrl } from '../config.js';
 
+// Abort any backend call that hangs longer than this — a stuck fetch would
+// otherwise stall a sync until Chrome kills the service worker.
+const REQUEST_TIMEOUT_MS = 30000;
+
 export class ApiClient {
 
   /**
@@ -35,10 +39,14 @@ export class ApiClient {
     const response = await fetch(`${baseUrl}${endpoint}`, {
       method,
       headers,
-      body: body ? JSON.stringify(body) : null
+      body: body ? JSON.stringify(body) : null,
+      signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS)
     });
 
-    if (response.status === 401 && !options.skipAuth) {
+    // Refresh-and-retry at most once: if the retried request still comes back
+    // 401 the session is genuinely dead, and looping refresh->401 forever
+    // would hammer the API.
+    if (response.status === 401 && !options.skipAuth && !options.retried) {
       const refreshed = await this.refreshToken();
       if (refreshed) {
         return this.request(method, endpoint, body, { ...options, retried: true });
@@ -46,7 +54,19 @@ export class ApiClient {
       throw new Error('Session expired. Please log in again.');
     }
 
-    const data = await response.json();
+    let data;
+    try {
+      data = await response.json();
+    } catch {
+      // Non-JSON body (e.g. an HTML error page from a proxy). Surface the
+      // HTTP status instead of a confusing JSON parse error.
+      if (!response.ok) {
+        const error = new Error(`API request failed (HTTP ${response.status})`);
+        error.status = response.status;
+        throw error;
+      }
+      throw new Error('Unexpected non-JSON response from API');
+    }
 
     if (!response.ok) {
       const error = new Error(data.message || 'API request failed');
@@ -70,7 +90,8 @@ export class ApiClient {
       const response = await fetch(`${baseUrl}/auth/refresh`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ refreshToken: token })
+        body: JSON.stringify({ refreshToken: token }),
+        signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS)
       });
 
       if (!response.ok) return false;

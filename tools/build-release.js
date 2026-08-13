@@ -25,6 +25,11 @@ const OUT = path.join(DIST, 'release');
 const EXCLUDE_TOP_LEVEL = new Set(['tools', 'dist', 'node_modules', '.git']);
 const EXCLUDE_FILES = new Set(['README.md']);
 
+// Dotfiles (.gitignore, .env*, editor config) are never runtime files.
+function isExcluded(name) {
+  return EXCLUDE_FILES.has(name) || name.startsWith('.');
+}
+
 function isLocalhost(url) {
   return /localhost|127\.0\.0\.1/i.test(url);
 }
@@ -32,7 +37,7 @@ function isLocalhost(url) {
 function copyDir(src, dest) {
   fs.mkdirSync(dest, { recursive: true });
   for (const entry of fs.readdirSync(src, { withFileTypes: true })) {
-    if (EXCLUDE_FILES.has(entry.name)) continue;
+    if (isExcluded(entry.name)) continue;
     const from = path.join(src, entry.name);
     const to = path.join(dest, entry.name);
     if (entry.isDirectory()) {
@@ -50,7 +55,7 @@ fs.rmSync(OUT, { recursive: true, force: true });
 fs.mkdirSync(OUT, { recursive: true });
 
 for (const entry of fs.readdirSync(ROOT, { withFileTypes: true })) {
-  if (EXCLUDE_TOP_LEVEL.has(entry.name)) continue;
+  if (EXCLUDE_TOP_LEVEL.has(entry.name) || isExcluded(entry.name)) continue;
   const from = path.join(ROOT, entry.name);
   const to = path.join(OUT, entry.name);
   if (entry.isDirectory()) {

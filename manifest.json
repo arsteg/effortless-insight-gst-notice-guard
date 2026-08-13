@@ -3,6 +3,7 @@
   "name": "EffortlessInsight - GST Notice Guard",
   "version": "1.0.0",
   "description": "Automatically capture and sync GST notices from the GST portal to EffortlessInsight",
+  "minimum_chrome_version": "103",
 
   "permissions": [
     "storage",
@@ -60,12 +61,5 @@
     "32": "assets/icon-32.png",
     "48": "assets/icon-48.png",
     "128": "assets/icon-128.png"
-  },
-
-  "web_accessible_resources": [
-    {
-      "resources": ["assets/*"],
-      "matches": ["https://services.gst.gov.in/*", "https://www.gst.gov.in/*"]
-    }
-  ]
+  }
 }

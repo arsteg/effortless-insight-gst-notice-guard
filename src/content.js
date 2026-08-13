@@ -996,11 +996,16 @@ function showSyncIndicator(message, status = 'syncing') {
   const indicator = document.createElement('div');
   indicator.className = `gst-guard-sync-indicator ${status}`;
 
+  // Build with DOM APIs — message may contain API/portal-derived text and must
+  // never be parsed as HTML in the portal page.
   if (status === 'syncing') {
-    indicator.innerHTML = `<div class="spinner"></div><span>${message}</span>`;
-  } else {
-    indicator.innerHTML = `<span>${message}</span>`;
+    const spinner = document.createElement('div');
+    spinner.className = 'spinner';
+    indicator.appendChild(spinner);
   }
+  const label = document.createElement('span');
+  label.textContent = message;
+  indicator.appendChild(label);
 
   document.body.appendChild(indicator);
 

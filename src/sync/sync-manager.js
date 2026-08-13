@@ -23,6 +23,9 @@ export class SyncManager {
     this.currentSession = null;
     this.syncInProgress = false;
     this.offlineQueue = [];
+    // Optional direct callback for the service worker, which never receives
+    // its own runtime messages (see notifyProgress).
+    this.onProgress = null;
   }
 
   /**
@@ -525,6 +528,14 @@ export class SyncManager {
    * Notify progress (for UI updates)
    */
   notifyProgress(progress) {
+    // Direct callback for the background context (sendMessage below is not
+    // delivered to the sender's own context).
+    try {
+      this.onProgress?.(progress);
+    } catch (error) {
+      console.error('[SyncManager] onProgress callback failed:', error);
+    }
+
     // Send message to popup or content script
     chrome.runtime.sendMessage({
       type: 'SYNC_PROGRESS',

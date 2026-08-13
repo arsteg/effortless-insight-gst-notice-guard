@@ -18,6 +18,15 @@ const apiClient = new ApiClient();
 const syncManager = new SyncManager(apiClient);
 const notificationManager = new NotificationManager();
 
+// chrome.runtime.sendMessage is never delivered to the sender's own context,
+// so the service worker cannot observe SyncManager's SYNC_PROGRESS broadcasts
+// (those go to the popup). React to progress via this direct callback instead.
+syncManager.onProgress = (progress) => {
+  if (progress?.type === 'offline_queue_processed' && progress.processed > 0) {
+    notificationManager.notifyOfflineQueue({ processed: progress.processed });
+  }
+};
+
 // ============================================================================
 // Initialization
 // ============================================================================
@@ -419,7 +428,7 @@ async function handleSessionPush(session) {
 
   const adopted = await adoptWebSession(session);
   if (adopted.success) {
-    console.log('[GST Guard] Auto signed in from web session for', adopted.user?.email);
+    console.log('[GST Guard] Auto signed in from web session');
   }
   return adopted;
 }
@@ -580,6 +589,13 @@ async function handleDirectSync(data) {
       }
     });
 
+    // startSync returns { queued: true } (without throwing) when offline —
+    // report that distinctly so the content script shows "queued", not "synced".
+    if (result.queued) {
+      await notificationManager.notifyOfflineQueue({ queuedCount: notices.length });
+      return { success: false, queued: true, message: result.message };
+    }
+
     // Update last sync time
     await chrome.storage.local.set({ lastSyncTime: Date.now() });
 
@@ -724,26 +740,5 @@ async function handleNoticesCaptured(data) {
 
   return { success: true };
 }
-
-// ============================================================================
-// Sync Progress Handler
-// ============================================================================
-
-// Listen for sync progress updates from SyncManager
-chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-  if (message.type === 'SYNC_PROGRESS') {
-    // Forward to popup if open
-    chrome.runtime.sendMessage(message).catch(() => {
-      // Popup not open, ignore
-    });
-
-    // Handle offline queue processed event
-    if (message.data?.type === 'offline_queue_processed' && message.data.processed > 0) {
-      notificationManager.notifyOfflineQueue({
-        processed: message.data.processed
-      });
-    }
-  }
-});
 
 console.log('[GST Guard] Background service worker loaded');

@@ -139,7 +139,9 @@ export class NotificationManager {
         url = `${webUrl}/notices`;
         break;
       case NotificationType.EXTENSION_UPDATE:
-        url = 'https://chrome.google.com/webstore/detail/gst-notice-guard';
+        // Resolves to this extension's real store page whatever ID it is
+        // published under.
+        url = `https://chromewebstore.google.com/detail/${chrome.runtime.id}`;
         break;
       case NotificationType.SYNC_COMPLETED:
       case NotificationType.SYNC_FAILED:
